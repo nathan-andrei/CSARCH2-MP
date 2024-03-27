@@ -1,0 +1,54 @@
+<!doctype HTML>
+<html>
+	<head>
+		<title>16-Bit Binary Floating Point converter</title>
+		<meta charset="utf8">
+		<link rel="stylesheet" href="./styles.css">
+	</head>
+	
+	<body>
+		<h1>Welcome to the IEEE-754 16-Bit Binary Floating Point Converter!</h1>
+		<!-- Pick between Binary or Decimal -->
+		<select name="operation" id="operation">
+			<option value="BI" selected>Binary Input</option>
+			<option value="DI">Decimal Input</option>
+		</select>
+		
+		<!--Show for Binary input operation; DEFAULT -->
+		<div class="Binary">
+			<h2>Input Binary and exponent</h2>
+			<label for="bMantissa">Binary:</label>
+			<input type="text" name="bMantissa" id="bMantissa"> x 2^(<input type="text" id="bExp">)
+		</div>
+		
+		<!-- Show for Decimal input operation -->
+		<div class="Decimal" style="display:none;">
+			<h2>Input Decimal and exponent</h2>
+			<label for="dMantissa">Decimal:</label>
+			<input type="text" name="dMantissa" id="dMantissa"> x 10^(<input type="text" id="dExp">)
+		</div>
+			
+			<button id="convert">Convert</button>
+			<p id="errText"></p>
+		
+		<!-- Show for the output -->
+		<div class="output" style="display:none;">
+			<div id="binaryOut">
+				<p><b>Binary:</b>
+				<span id="binaryOutText">Test</span> </p>
+				<!-- binary output will be rendered here ^ -->
+			</div>
+			<div id="hexOut">
+				<p><b>Hexadecimal:</b>
+				<span id="hexOutText">Test</span> </p>
+				<!-- hexadecimal output will be rendered here ^ -->
+			</div>
+			<div id="textOut">
+				<button id="export">Export to text file</button>
+			</div>
+		</div>
+	</body>
+	
+	<script src="./back-end.js" refer></script>
+
+</html>

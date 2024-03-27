@@ -1,0 +1,12 @@
+h1{
+	font-family:arial;
+}
+
+button {
+	margin-top: 10px;
+}
+
+#errText {
+	display: none;
+	color: red;
+}
