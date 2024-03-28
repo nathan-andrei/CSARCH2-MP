@@ -1,12 +1,217 @@
-h1{
-	font-family:arial;
+*{
+    margin: 0;
+    padding: 0;
+	overflow-y: hidden;
+	overflow-x: hidden;
 }
 
-button {
+#container {
+	position: relative;
+	height: 70vh;
+	width: 50vw;
+	background-color: rgb(177, 177, 177);
+}
+
+#title_container{
+	position: relative;
+	height: 15%;
+	width: 100%;
+	background-color: rgb(68, 68, 68);
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+}
+
+#title{
+	color: white;
+	font-family:'Times New Roman', Times, serif;
+	position: relative;
+	font-weight: bold;
+}
+
+#converter_container{
+	position: relative;
+	height: 100%;
+	width: 100%;	
+}
+
+#input_choice_selector_box{
+	position: relative;
+	width: 100%;
+	height: 10%;
+	display: flex;
+	justify-content: center;
+}
+
+#operation{
+	font-family:'Times New Roman', Times, serif;
+	font-size: 20px;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+}
+
+#content_box{
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.Binary{
+	position: relative;
+	width: 100%;
+	height: 5%;
+	text-align: center;
+	align-items: center;
+	margin-top: 5%;
+}
+
+.Decimal{
+	position: relative;
+	width: 100%;
+	height: 5%;
+	text-align: center;
+	align-items: center;
+	margin-top: 5%;
+}
+
+.label_input{
+	font-family:'Times New Roman', Times, serif;
+	text-align: center;
+	font-size: 25px;
+}
+
+#bMantissa{
+	border-radius: 20px;
+	text-align: center;
+	width: 12%;
+	height: 70%;
+}
+
+#dMantissa{
+	border-radius: 20px;
+	text-align: center;
+	width: 12%;
+	height: 70%;
+}
+
+.label_exp_input{
+	font-family:'Times New Roman', Times, serif;
+	font-size: 25px;
+}
+
+#bExp{
+	font-weight: bold;
+	border-radius: 20px;
+	text-align: center;
+	width: 10%;
+	height: 70%;
+}
+
+#dExp{
+	font-weight: bold;
+	border-radius: 20px;
+	text-align: center;
+	width: 10%;
+	height: 70%;
+}
+
+#convert_button_box{
+	position: relative;
+	width: 50%;
+	height: 7%;
+	text-align: center;
+	justify-content: center;
+	margin: auto;
+	display: flex;
+}
+
+#convert{
 	margin-top: 10px;
+	width: 100%;
+	font-weight: bolder;
+	border-radius: 10px;
+	background-color: seagreen;
+	color: white;
 }
 
-#errText {
+#error_message_box{
+	position: relative;
+	width: 50%;
+	height: 5%;
+	text-align: center;
+	margin: auto;
+	margin-top: 20px;
+}
+
+#errText{
 	display: none;
 	color: red;
+	font-size: 20px;
+	font-weight: bolder;
+}
+
+.output{
+	background-color: rgb(94, 94, 94);
+	position: relative;
+	width: 50%;
+	height: 40%;
+	text-align: center;
+	align-items: center;
+	margin: auto;
+	border-radius: 30px;
+	border: 2px solid black;
+}
+
+#binaryOut{
+	position: relative;
+	margin-top: 10%;
+	height: 20%;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 20px;
+}
+
+#binaryOutText{
+	font-family:'Times New Roman', Times, serif;
+	color: white;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#hexOut{
+	position: relative;
+	margin-top: 6%;
+	height: 20%;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 20px;
+}
+
+#hexOutText{
+	font-family:'Times New Roman', Times, serif;
+	color: white;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#textOut{
+	height: 15%;
+	width: 50%;
+	margin: auto;
+}
+
+#export{
+	margin-top: 10px;
+	height: 75%;
+	width: 100%;
+	font-weight: bolder;
+	border-radius: 10px;
+	background-color: seagreen;
+	color: white;
 }
