@@ -4,49 +4,73 @@
 		<title>16-Bit Binary Floating Point converter</title>
 		<meta charset="utf8">
 		<link rel="stylesheet" href="./styles.css">
+		<script src = "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>
 	</head>
 	
 	<body>
-		<h1>Welcome to the IEEE-754 16-Bit Binary Floating Point Converter!</h1>
-		<!-- Pick between Binary or Decimal -->
-		<select name="operation" id="operation">
-			<option value="BI" selected>Binary Input</option>
-			<option value="DI">Decimal Input</option>
-		</select>
-		
-		<!--Show for Binary input operation; DEFAULT -->
-		<div class="Binary">
-			<h2>Input Binary and exponent</h2>
-			<label for="bMantissa">Binary:</label>
-			<input type="text" name="bMantissa" id="bMantissa"> x 2^(<input type="text" id="bExp">)
-		</div>
-		
-		<!-- Show for Decimal input operation -->
-		<div class="Decimal" style="display:none;">
-			<h2>Input Decimal and exponent</h2>
-			<label for="dMantissa">Decimal:</label>
-			<input type="text" name="dMantissa" id="dMantissa"> x 10^(<input type="text" id="dExp">)
-		</div>
-			
-			<button id="convert">Convert</button>
-			<p id="errText"></p>
-		
-		<!-- Show for the output -->
-		<div class="output" style="display:none;">
-			<div id="binaryOut">
-				<p><b>Binary:</b>
-				<span id="binaryOutText">Test</span> </p>
-				<!-- binary output will be rendered here ^ -->
+
+		<div id="container"> 
+
+			<div id="title_container"> 
+				<h1 id="title">IEEE-754 16-Bit Binary Floating Point Converter</h1>
 			</div>
-			<div id="hexOut">
-				<p><b>Hexadecimal:</b>
-				<span id="hexOutText">Test</span> </p>
-				<!-- hexadecimal output will be rendered here ^ -->
-			</div>
-			<div id="textOut">
-				<button id="export">Export to text file</button>
+
+			<div id="converter_container">
+				<div id="input_choice_selector_box">
+					<!-- Pick between Binary or Decimal -->
+					<select name="operation" id="operation">
+						<option value="BI" selected>Binary Input</option>
+						<option value="DI">Decimal Input</option>
+					</select>
+				</div>
+
+				<div id="content_box">
+					<!--Show for Binary input operation; DEFAULT -->
+					<div class="Binary">
+						<!-- <h2>Input Binary and exponent</h2> -->
+						<label for="bMantissa" class="label_input">Input Binary:</label>
+						<input type="text" name="bMantissa" id="bMantissa" maxlength="11" > 
+						<label class="label_exp_input"> x 2^ </label>
+						<input type="text" id="bExp">
+					</div>
+
+					<!-- Show for Decimal input operation -->
+					<div class="Decimal" style="display:none;">
+						<label for="dMantissa" class="label_input">Input Decimal:</label>
+						<input type="text" name="dMantissa" id="dMantissa" maxlength="11"> 
+						<label class="label_exp_input"> x 10^ </label>
+						<input type="text" id="dExp">
+					</div>
+
+					<div id="convert_button_box">
+						<button id="convert">CONVERT</button>
+						
+					</div>
+
+					<div id="error_message_box">
+						<p id="errText"></p>
+					</div>
+
+					<!-- Show for the output -->
+					<div class="output" style="display: none;">
+						<div id="binaryOut">
+							<p><b>Binary:</b>
+							<span id="binaryOutText"></span> </p>
+							<!-- binary output will be rendered here ^ -->
+						</div>
+						<div id="hexOut">
+							<p><b>Hexadecimal:</b>
+							<span id="hexOutText"></span> </p>
+							<!-- hexadecimal output will be rendered here ^ -->
+						</div>
+						<div id="textOut">
+							<button id="export">Export to Text File</button>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
+		 
 	</body>
 	
 	<script src="./back-end.js" refer></script>
