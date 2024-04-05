@@ -7,6 +7,8 @@ let selector = doc.querySelector("#operation");
 let errText = doc.querySelector("#errText");
 let output = doc.querySelector(".output");
 let exportOutput = doc.querySelector("#export");
+let specialCase = doc.querySelector("#specialCase");
+let approx = doc.querySelector("#approx");
 
 //This function will change the operation shown on the site
 selector.addEventListener('change', function() {
@@ -18,6 +20,8 @@ selector.addEventListener('change', function() {
 		binary.style.display="none";
 		decimal.style.display="block";
 	}
+	approx.style.display="none";
+	specialCase.innerHTML="";
 	output.style.display="none";
 	errText.style.display="none";
 });
@@ -39,6 +43,7 @@ let out = { binary:"default", hex:"default", flag:false}
 //This function will detect if the convert button has been pressed, and will do the correct process
 convert.addEventListener('click', function() {
 
+	approx.style.display="none";
 	if(selector.value == "BI"){
 		[out.binary, out.hex, out.flag] = binaryConvert(bMantissa.value, bExp.value);
 	}
@@ -59,6 +64,7 @@ convert.addEventListener('click', function() {
 		binaryOut.innerHTML=out.binary;
 		hexOut.innerHTML=out.hex;
 		output.style.display="block";
+		
 	}
 	else{
 		output.style.display="none";
@@ -68,19 +74,23 @@ convert.addEventListener('click', function() {
 
 //This function will export the output to a text file
 exportOutput.addEventListener('click', function() {
-
+	let content = "";
+	
 	if ( selector.value == "BI" ){
 
-		let line0 = "========================================\n";
-		let line1 = "[INPUT]" + "\n";
-		let line2 = "Mantissa: " + bMantissa.value + "\n";
-		let line3 = "Exponent: " + bExp.value + "\n";
-		let line4 = "========================================\n";
-		let line5 = "[OUTPUT]" + "\n";
-		let line6 = "Binary: " + out.binary + "\n";
-		let line7 = "Hex: " + out.hex + "\n";
-		let line8 = "========================================\n";
-		let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
+		content += "========================================\n";
+		content += "[INPUT]" + "\n";
+		content += "Mantissa: " + bMantissa.value + "\n";
+		content += "Exponent: " + bExp.value + "\n";
+		content += "========================================\n";
+		content += "[OUTPUT]" + "\n";
+		content += "Binary: " + out.binary + "\n";
+		
+		if(specialCase.innerHTML != "")	content += specialCase.innerHTML + "\n";
+		
+		content += "Hex: " + out.hex + "\n";
+		content += "========================================\n";
+		//let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
 
 		//Credit from https://www.tutorialspoint.com/how-to-create-and-save-text-file-in-javascript
 		var blob = new Blob([content], {
@@ -90,16 +100,20 @@ exportOutput.addEventListener('click', function() {
 
 	} else {
 
-		let line0 = "========================================\n";
-		let line1 = "[INPUT]" + "\n";
-		let line2 = "Mantissa: " + dMantissa.value + "\n";
-		let line3 = "Exponent: " + dExp.value + "\n";
-		let line4 = "========================================\n";
-		let line5 = "[OUTPUT]" + "\n";
-		let line6 = "Binary: " + out.binary + "\n";
-		let line7 = "Hex: " + out.hex + "\n";
-		let line8 = "========================================\n";
-		let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
+		content += "========================================\n";
+		content += "[INPUT]" + "\n";
+		content += "Mantissa: " + dMantissa.value + "\n";
+		content += "Exponent: " + dExp.value + "\n";
+		content += "========================================\n";
+		content += "[OUTPUT]" + "\n";
+		content += "Binary: " + out.binary + "\n";
+		
+		if(approx.style.display == "block")	content += "Warning: Number too precise for 16-bit floating point binary!\nBinary can only provide approximation." + "\n";
+		if(specialCase.innerHTML != "")	content += specialCase.innerHTML + "\n";
+		
+		content += "Hex: " + out.hex + "\n";
+		content += "========================================\n";
+		//let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
 
 		var blob = new Blob([content], {
 			type: "text/plain;charset=utf-8",
@@ -121,31 +135,35 @@ function binaryConvert(m, e){
 	let b = "0 "; //default positive sign bit
 	let expChange = 0;
 	let f = false;
-		
-	if(binaryMantissaErrorCheck(m) && binaryExpErrorCheck(e)){
+	specialCase.innerHTML="";
+	if(binaryMantissaErrorCheck(m)){
 		if(m < 0){ //negative sign bit;
 			b = "1 ";
 		}
 		m = m.replace(/[-+]/g,"");
 		[ m, expChange ]= normalize(m);
 		
+		if(m == false){
+			showError("Mantissa is zero input!");
+			return [b, toHex(b), true];
+		}
+		
 		//we need to check if we're missing digits, if so, figure out if sign or zero extend or trailing zero
 		//We will use trailing zero for now
 		m = extendTrailingZeros(m, 11); //Mantissa should only have 1 - 11 bits including MSb
 		
 		e = parseInt(e, 10) + 15 + expChange;
+		
+		if(!binaryExpErrorCheck((e-15).toString())){
+			return [b, toHex(b), true];
+		}
+		
 		e = decimalToBinary(e, 5);	
 		b = b + e + " ";
 		//check here if the exponent is a special case; Do we need this? This is for converting it back, not converting it to binary-16
-		/*
-		if(arrayEquals(e, [1,1,1,1,1]){
-			if(m, [0,0,0,0,0,0,0,0,0,0]){
-				//Infinity
-			}
-			else{
-				//NaN (quiet/signaling)
-			}
-		}*/
+		
+		showSpecialCase(e, m, b);
+		
 		m = m.replace(/1\./g,"");
 		b = b + m; //10 bits
 		f = false;
@@ -160,7 +178,7 @@ function binaryConvert(m, e){
 function decimalConvert(m, e){
 	let b = "0 "; //default positive sign bit
 	let f = false;
-		
+	specialCase.innerHTML="";
 	if(decimalMantissaErrorCheck(m) && decimalExpErrorCheck(e)){
 
 		if(m[0] == '-'){ //negative sign bit;
@@ -169,20 +187,43 @@ function decimalConvert(m, e){
 
 		m = m.replace(/[-+]/g,"");
 		
-		m = decimalToBinaryMantissa(m);
-
-		console.log(m);
+		//reconcile 10^0
+		m = String(Number(m) * (10**e));
+		e = 0;
+		
+		//m = decimalToBinaryMantissa(m);
+		m = decimalToBinary(Number(m), 11);
 		
 		[ m, expChange ]= normalize(m);
+		
+		if(m == false){
+			showError("Mantissa is zero input!");
+			return [b, toHex(b), true];
+		}
+		
+		if(m.indexOf('.') != -1){
+			if(m.slice(13).indexOf(1) != -1){
+				approx.style.display="block";
+			}
+			m = m.slice(0,12);
+		}
+		else{
+			m = m.slice(0,11);
+		}
 
 		console.log(m)
 
 		m = extendTrailingZeros(m, 11); //Mantissa should only have 1 - 11 bits including MSb
 		
-		e = parseInt(e, 10) + 15 + expChange;
+		e = 15 + expChange;
+		if(!binaryExpErrorCheck((e-15).toString())){
+			return [b, toHex(b), true];
+		}
 		e = decimalToBinary(e, 5);	
 		b = b + e + " ";
 
+		showSpecialCase(e, m, b);	
+			
 		m = m.replace(/1\./g,"");
 		b = b + m; //10 bits
 
@@ -246,8 +287,8 @@ function binaryExpErrorCheck(e){ //Binary Exp
 		showError("Exponent is not a number!");
 	}
 	//out of range
-	else if ( e >= 17 ){
-		showError("Exponent is out of range! Please input an exponent below 17.");
+	else if ( e < -15 || e > 16 ){
+		showError("Exponent is out of range!");
 	}
 	else{
 		return true;
@@ -268,8 +309,6 @@ function decimalMantissaErrorCheck(m){ //Decimal Mantissa
 	else if(isNaN(m)){
 		showError("Mantissa is not a number!");
 	}
-	//Too many digits?
-	//console.log(error message);
 	else{
 		return true;
 	}
@@ -289,8 +328,8 @@ function decimalExpErrorCheck(e){ //Decimal Exp
 	else if(isNaN(e)){
 		showError("Exponent is not a number!");
 	}
-	else if ( e >= 17 ){
-		showError("Exponent is out of range! Please input an exponent below 17.");
+	else if ( e < -15 || e > 16 ){
+		showError("Exponent is out of range!");
 	}
 	else{
 		return true;
@@ -303,17 +342,14 @@ function decimalExpErrorCheck(e){ //Decimal Exp
 function showError(s){
 	errText.innerHTML=s;
 	errText.style.display="block";
+	approx.style.display="none";
+	specialCase.innerHTML="";
 }
 
 function toHex(b){
 	//Remove all spaces from the binary string
 	b = b.replace(/ /g, "");
-	/*
-	let missingLength = 3 - (b.length%4); //this shouldn't be required, but I'll make it for testing
-	for(let i = 0; i <= missingLength; i++){
-		b = "0" + b;
-	}
-	console.log("b after extend: " + b);*/
+
 	//Divide into 4 and convert to hex
 	let segments = b.length/4;
 
@@ -404,91 +440,41 @@ function decimalToBinary(d, n = 5){
 		return -1;
 	}
 	let binary = "";
+	let dotIndex = String(d).indexOf('.');
+	let fraction = null;
+	if(dotIndex != -1){
+		[d, fraction] = String(d).split('.');
+		d = parseInt(d, 10);
+		if(d == 0){
+			binary = "0";
+		}
+	}
 	while(d > 0){
 		binary = d%2 + binary;
 		d = Math.floor(d/2);
 	}
+	if(fraction != null){
+		binary = binary + '.';
+		fraction = fraction / (10**(fraction.length));
+		let binaryFraction = "";
+		do{
+			fraction = fraction * 2;
+			binaryFraction = binaryFraction + String(fraction)[0];
+			if(fraction > 1){
+				fraction = fraction - 1;
+			}
+			
+		}while(fraction % 1 != 0);
+		binary = binary + binaryFraction;
+	}
+	
 	if (binary.length < n){
 		for(let i = binary.length; i < n; i++){
 			binary = "0" + binary;
 		}
 	}
-
-	console.log(binary);
+	
 	return binary;
-}
-
-function decimalToBinaryMantissa(d){
-
-	//Declare variables
-	let m = "";
-	let dotM = "";
-
-	//Get the integer part of the mantissa
-	let tempD = "";
-	for ( let i = 0 ; i < d.length; i++ ){
-
-		if ( d[i] != "."){
-			tempD = tempD.concat(d[i]);
-		}
-		else if ( d[i] == "."){
-			break;
-		}
-
-	}
-
-	//Convert the integer part of the mantissa to binary and store it to m
-	m = ( tempD >>> 0 ).toString(2);
-
-	//Get the fractional part of the mantissa 
-	for ( let i = 0 ; i < d.length; i++ ){
-
-		if ( d[i] == "."){
-			dotM = d.slice(i+1, d.length);
-			break;
-		}
-
-	}
-
-	//Convert the fractional part of the mantissa to binary and store it to dotM
-	dotM = convertDotMantissaToBinary(dotM);
-
-	//Combine the integer and fractional part of the mantissa
-	m = m.concat("." + dotM);
-
-	return m;
-}
-
-function convertDotMantissaToBinary(dotM){
-
-	//Declare variables
-	convertedDotM = "";
-	dotMLength = dotM.length;
-
-	//Make dotM decimal 0.<+dotM>
-	dotM = "0." + dotM;
-
-	let j = 1;
-	for ( let i = 0 ; i < dotMLength; i++ ){
-
-		console.log(convertedDotM)
-
-		if ( (2**-j) > parseFloat(dotM) ){
-			convertedDotM = convertedDotM.concat("0");
-		} else if ( (2**-j) < parseFloat(dotM) ) {
-			convertedDotM = convertedDotM.concat("1");
-			dotM = parseFloat(dotM) - (2**-j);
-		} else if ( (2**-j) == parseFloat(dotM) ) {
-			convertedDotM = convertedDotM.concat("1");
-		} else if ( parseFloat(dotM) <= 0 ){
-			break;
-		} 
-
-		j++;
-	}
-
-	return convertedDotM.replace("0.", "");
-
 }
 
 //This function will extend it with trailing zero up to n number of digits. Will not do anything n is smaller.
@@ -522,7 +508,8 @@ function normalize(m){
 		}
 	}
 	else if(dotIndex == 0){ //starts with dot, so just add a leading 1 to the mantissa? or is it AN ERROR?
-		return ["1" + m, 0];
+		//return ["1" + m, 0];
+		return leadingDigitsNormalize(m, dotIndex);
 	}
 	else if (dotIndex == -1){
 		if(m[0] == "0"){ //Leading Zeros; We actually don't know what to do here! Do we truncate or what? e.x. 000101 -> 1.01?
@@ -547,14 +534,50 @@ function normalize(m){
 }
 
 function leadingDigitsNormalize(m, d){
-	let i = 0;
+	let i = -1;
 	do{
 		i += 1;		
-		if (i > m.length){
+		if (i >= m.length){
 			i = -1;
 			break;
 		}
 	}while(m[i] == "0" || m[i] == '.');
+	if(i == -1){
+		return [false, 0];
+	}
 	return [m[i] + '.' + m.substring(i+1, m.length), (i-d)*(-1)]
 }
 
+function showSpecialCase(e, m, b){
+	m = m.slice(2);
+	console.log(m);
+	if(arrayEquals(e, [1,1,1,1,1])){
+			if(arrayEquals(m, [0,0,0,0,0,0,0,0,0,0])){
+				//Infinity
+				if(b[0] == "1"){
+					specialCase.innerHTML = "Special: Negative infinity";
+				}
+				else{
+					specialCase.innerHTML = "Special: Positive infinity";
+				}
+			}
+			else{
+				//NaN (quiet/signaling)
+				specialCase.innerHTML = "Special: NaN (Quiet/signaling)";
+			}
+		}
+		else if(arrayEquals(e, [0,0,0,0,0])){ //zero or subnormal
+			if(arrayEquals(m, [0,0,0,0,0,0,0,0,0,0])){
+				//Zero/Negative Zero
+				if(b[0] == "1"){
+					specialCase.innerHTML = "Special: Zero/Negative Zero";
+				}
+				else{
+					specialCase.innerHTML = "Special: Zero";
+				}
+			}
+			else{
+				specialCase.innerHTML = "Special: Subnormal number";
+			}
+		}
+}
