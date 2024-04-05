@@ -29,7 +29,7 @@
 					<div class="Binary">
 						<!-- <h2>Input Binary and exponent</h2> -->
 						<label for="bMantissa" class="label_input">Input Binary:</label>
-						<input type="text" name="bMantissa" id="bMantissa" maxlength="11" > 
+						<input type="text" name="bMantissa" id="bMantissa"> 
 						<label class="label_exp_input"> x 2^ </label>
 						<input type="text" id="bExp">
 					</div>
@@ -37,7 +37,7 @@
 					<!-- Show for Decimal input operation -->
 					<div class="Decimal" style="display:none;">
 						<label for="dMantissa" class="label_input">Input Decimal:</label>
-						<input type="text" name="dMantissa" id="dMantissa" maxlength="11"> 
+						<input type="text" name="dMantissa" id="dMantissa"> 
 						<label class="label_exp_input"> x 10^ </label>
 						<input type="text" id="dExp">
 					</div>
@@ -56,6 +56,7 @@
 						<div id="binaryOut">
 							<p><b>Binary:</b>
 							<span id="binaryOutText"></span> </p>
+							<p id="specialCase"></p>
 							<!-- binary output will be rendered here ^ -->
 						</div>
 						<div id="hexOut">

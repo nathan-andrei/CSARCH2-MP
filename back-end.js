@@ -7,6 +7,7 @@ let selector = doc.querySelector("#operation");
 let errText = doc.querySelector("#errText");
 let output = doc.querySelector(".output");
 let exportOutput = doc.querySelector("#export");
+let specialCase = doc.querySelector("#specialCase");
 
 //This function will change the operation shown on the site
 selector.addEventListener('change', function() {
@@ -121,31 +122,63 @@ function binaryConvert(m, e){
 	let b = "0 "; //default positive sign bit
 	let expChange = 0;
 	let f = false;
-		
-	if(binaryMantissaErrorCheck(m) && binaryExpErrorCheck(e)){
+	specialCase.innerHTML="";
+	if(binaryMantissaErrorCheck(m)){
 		if(m < 0){ //negative sign bit;
 			b = "1 ";
 		}
 		m = m.replace(/[-+]/g,"");
 		[ m, expChange ]= normalize(m);
 		
+		if(m == false){
+			showError("Mantissa is zero input!");
+			return [b, toHex(b), true];
+		}
+		
 		//we need to check if we're missing digits, if so, figure out if sign or zero extend or trailing zero
 		//We will use trailing zero for now
 		m = extendTrailingZeros(m, 11); //Mantissa should only have 1 - 11 bits including MSb
 		
 		e = parseInt(e, 10) + 15 + expChange;
+		
+		if(!binaryExpErrorCheck((e-15).toString())){
+			return [b, toHex(b), true];
+		}
+		
 		e = decimalToBinary(e, 5);	
 		b = b + e + " ";
 		//check here if the exponent is a special case; Do we need this? This is for converting it back, not converting it to binary-16
-		/*
-		if(arrayEquals(e, [1,1,1,1,1]){
+		if(arrayEquals(e, [1,1,1,1,1])){
 			if(m, [0,0,0,0,0,0,0,0,0,0]){
 				//Infinity
+				if(b[0] == "1"){
+					specialCase.innerHTML = "Special: Negative infinity";
+				}
+				else{
+					specialCase.innerHTML = "Special: Positive infinity";
+				}
 			}
 			else{
 				//NaN (quiet/signaling)
+				specialCase.innerHTML = "Special: NaN (Quiet/signaling)";
 			}
-		}*/
+		}
+		else if(arrayEquals(e, [0,0,0,0,0])){ //zero or subnormal
+			if(m, [0,0,0,0,0,0,0,0,0,0]){
+				//Zero/Negative Zero
+				if(b[0] == "1"){
+					specialCase.innerHTML = "Special: Zero/Negative Zero";
+				}
+				else{
+					specialCase.innerHTML = "Special: Zero";
+				}
+			}
+			else{
+				//NaN (quiet/signaling)
+				specialCase.innerHTML = "Special: Subnormal number)";
+			}
+		}
+		
 		m = m.replace(/1\./g,"");
 		b = b + m; //10 bits
 		f = false;
@@ -246,8 +279,8 @@ function binaryExpErrorCheck(e){ //Binary Exp
 		showError("Exponent is not a number!");
 	}
 	//out of range
-	else if ( e >= 17 ){
-		showError("Exponent is out of range! Please input an exponent below 17.");
+	else if ( e < -15 || e > 16 ){
+		showError("Exponent is out of range!");
 	}
 	else{
 		return true;
@@ -289,8 +322,8 @@ function decimalExpErrorCheck(e){ //Decimal Exp
 	else if(isNaN(e)){
 		showError("Exponent is not a number!");
 	}
-	else if ( e >= 17 ){
-		showError("Exponent is out of range! Please input an exponent below 17.");
+	else if ( e < -14 || e > 15 ){
+		showError("Exponent is out of range!");
 	}
 	else{
 		return true;
@@ -414,7 +447,7 @@ function decimalToBinary(d, n = 5){
 		}
 	}
 
-	console.log(binary);
+	//console.log(binary);
 	return binary;
 }
 
@@ -522,7 +555,8 @@ function normalize(m){
 		}
 	}
 	else if(dotIndex == 0){ //starts with dot, so just add a leading 1 to the mantissa? or is it AN ERROR?
-		return ["1" + m, 0];
+		//return ["1" + m, 0];
+		return leadingDigitsNormalize(m, dotIndex);
 	}
 	else if (dotIndex == -1){
 		if(m[0] == "0"){ //Leading Zeros; We actually don't know what to do here! Do we truncate or what? e.x. 000101 -> 1.01?
@@ -547,14 +581,17 @@ function normalize(m){
 }
 
 function leadingDigitsNormalize(m, d){
-	let i = 0;
+	let i = -1;
 	do{
 		i += 1;		
-		if (i > m.length){
+		if (i >= m.length){
 			i = -1;
 			break;
 		}
 	}while(m[i] == "0" || m[i] == '.');
+	if(i == -1){
+		return [false, 0];
+	}
 	return [m[i] + '.' + m.substring(i+1, m.length), (i-d)*(-1)]
 }
 
