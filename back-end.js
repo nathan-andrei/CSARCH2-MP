@@ -74,19 +74,23 @@ convert.addEventListener('click', function() {
 
 //This function will export the output to a text file
 exportOutput.addEventListener('click', function() {
-
+	let content = "";
+	
 	if ( selector.value == "BI" ){
 
-		let line0 = "========================================\n";
-		let line1 = "[INPUT]" + "\n";
-		let line2 = "Mantissa: " + bMantissa.value + "\n";
-		let line3 = "Exponent: " + bExp.value + "\n";
-		let line4 = "========================================\n";
-		let line5 = "[OUTPUT]" + "\n";
-		let line6 = "Binary: " + out.binary + "\n";
-		let line7 = "Hex: " + out.hex + "\n";
-		let line8 = "========================================\n";
-		let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
+		content += "========================================\n";
+		content += "[INPUT]" + "\n";
+		content += "Mantissa: " + bMantissa.value + "\n";
+		content += "Exponent: " + bExp.value + "\n";
+		content += "========================================\n";
+		content += "[OUTPUT]" + "\n";
+		content += "Binary: " + out.binary + "\n";
+		
+		if(specialCase.innerHTML != "")	content += specialCase.innerHTML + "\n";
+		
+		content += "Hex: " + out.hex + "\n";
+		content += "========================================\n";
+		//let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
 
 		//Credit from https://www.tutorialspoint.com/how-to-create-and-save-text-file-in-javascript
 		var blob = new Blob([content], {
@@ -96,16 +100,20 @@ exportOutput.addEventListener('click', function() {
 
 	} else {
 
-		let line0 = "========================================\n";
-		let line1 = "[INPUT]" + "\n";
-		let line2 = "Mantissa: " + dMantissa.value + "\n";
-		let line3 = "Exponent: " + dExp.value + "\n";
-		let line4 = "========================================\n";
-		let line5 = "[OUTPUT]" + "\n";
-		let line6 = "Binary: " + out.binary + "\n";
-		let line7 = "Hex: " + out.hex + "\n";
-		let line8 = "========================================\n";
-		let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
+		content += "========================================\n";
+		content += "[INPUT]" + "\n";
+		content += "Mantissa: " + dMantissa.value + "\n";
+		content += "Exponent: " + dExp.value + "\n";
+		content += "========================================\n";
+		content += "[OUTPUT]" + "\n";
+		content += "Binary: " + out.binary + "\n";
+		
+		if(approx.style.display == "block")	content += "Warning: Number too precise for 16-bit floating point binary!\nBinary can only provide approximation." + "\n";
+		if(specialCase.innerHTML != "")	content += specialCase.innerHTML + "\n";
+		
+		content += "Hex: " + out.hex + "\n";
+		content += "========================================\n";
+		//let content = line0 + line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8;
 
 		var blob = new Blob([content], {
 			type: "text/plain;charset=utf-8",
