@@ -301,8 +301,6 @@ function decimalMantissaErrorCheck(m){ //Decimal Mantissa
 	else if(isNaN(m)){
 		showError("Mantissa is not a number!");
 	}
-	//Too many digits?
-	//console.log(error message);
 	else{
 		return true;
 	}
@@ -343,12 +341,7 @@ function showError(s){
 function toHex(b){
 	//Remove all spaces from the binary string
 	b = b.replace(/ /g, "");
-	/*
-	let missingLength = 3 - (b.length%4); //this shouldn't be required, but I'll make it for testing
-	for(let i = 0; i <= missingLength; i++){
-		b = "0" + b;
-	}
-	console.log("b after extend: " + b);*/
+
 	//Divide into 4 and convert to hex
 	let segments = b.length/4;
 
@@ -474,79 +467,6 @@ function decimalToBinary(d, n = 5){
 	}
 	
 	return binary;
-}
-
-function decimalToBinaryMantissa(d){
-
-	//Declare variables
-	let m = "";
-	let dotM = "";
-
-	//Get the integer part of the mantissa
-	let tempD = "";
-	for ( let i = 0 ; i < d.length; i++ ){
-
-		if ( d[i] != "."){
-			tempD = tempD.concat(d[i]);
-		}
-		else if ( d[i] == "."){
-			break;
-		}
-
-	}
-
-	//Convert the integer part of the mantissa to binary and store it to m
-	m = ( tempD >>> 0 ).toString(2);
-
-	//Get the fractional part of the mantissa 
-	for ( let i = 0 ; i < d.length; i++ ){
-
-		if ( d[i] == "."){
-			dotM = d.slice(i+1, d.length);
-			break;
-		}
-
-	}
-
-	//Convert the fractional part of the mantissa to binary and store it to dotM
-	dotM = convertDotMantissaToBinary(dotM);
-
-	//Combine the integer and fractional part of the mantissa
-	m = m.concat("." + dotM);
-
-	return m;
-}
-
-function convertDotMantissaToBinary(dotM){
-
-	//Declare variables
-	convertedDotM = "";
-	dotMLength = dotM.length;
-
-	//Make dotM decimal 0.<+dotM>
-	dotM = "0." + dotM;
-
-	let j = 1;
-	for ( let i = 0 ; i < dotMLength; i++ ){
-
-		console.log(convertedDotM)
-
-		if ( (2**-j) > parseFloat(dotM) ){
-			convertedDotM = convertedDotM.concat("0");
-		} else if ( (2**-j) < parseFloat(dotM) ) {
-			convertedDotM = convertedDotM.concat("1");
-			dotM = parseFloat(dotM) - (2**-j);
-		} else if ( (2**-j) == parseFloat(dotM) ) {
-			convertedDotM = convertedDotM.concat("1");
-		} else if ( parseFloat(dotM) <= 0 ){
-			break;
-		} 
-
-		j++;
-	}
-
-	return convertedDotM.replace("0.", "");
-
 }
 
 //This function will extend it with trailing zero up to n number of digits. Will not do anything n is smaller.
