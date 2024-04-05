@@ -49,6 +49,9 @@
 
 					<div id="error_message_box">
 						<p id="errText"></p>
+						<p id="approx" style="display:none;">Warning: Number too precise for 16-bit floating point binary! 
+														 <br>Binary can only provide approximation.</p>
+						<p id="specialCase"></p>
 					</div>
 
 					<!-- Show for the output -->
@@ -56,7 +59,7 @@
 						<div id="binaryOut">
 							<p><b>Binary:</b>
 							<span id="binaryOutText"></span> </p>
-							<p id="specialCase"></p>
+							
 							<!-- binary output will be rendered here ^ -->
 						</div>
 						<div id="hexOut">

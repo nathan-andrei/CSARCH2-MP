@@ -8,6 +8,7 @@ let errText = doc.querySelector("#errText");
 let output = doc.querySelector(".output");
 let exportOutput = doc.querySelector("#export");
 let specialCase = doc.querySelector("#specialCase");
+let approx = doc.querySelector("#approx");
 
 //This function will change the operation shown on the site
 selector.addEventListener('change', function() {
@@ -19,6 +20,8 @@ selector.addEventListener('change', function() {
 		binary.style.display="none";
 		decimal.style.display="block";
 	}
+	approx.style.display="none";
+	specialCase.innerHTML="";
 	output.style.display="none";
 	errText.style.display="none";
 });
@@ -40,6 +43,7 @@ let out = { binary:"default", hex:"default", flag:false}
 //This function will detect if the convert button has been pressed, and will do the correct process
 convert.addEventListener('click', function() {
 
+	approx.style.display="none";
 	if(selector.value == "BI"){
 		[out.binary, out.hex, out.flag] = binaryConvert(bMantissa.value, bExp.value);
 	}
@@ -60,6 +64,7 @@ convert.addEventListener('click', function() {
 		binaryOut.innerHTML=out.binary;
 		hexOut.innerHTML=out.hex;
 		output.style.display="block";
+		
 	}
 	else{
 		output.style.display="none";
@@ -148,36 +153,8 @@ function binaryConvert(m, e){
 		e = decimalToBinary(e, 5);	
 		b = b + e + " ";
 		//check here if the exponent is a special case; Do we need this? This is for converting it back, not converting it to binary-16
-		if(arrayEquals(e, [1,1,1,1,1])){
-			if(m, [0,0,0,0,0,0,0,0,0,0]){
-				//Infinity
-				if(b[0] == "1"){
-					specialCase.innerHTML = "Special: Negative infinity";
-				}
-				else{
-					specialCase.innerHTML = "Special: Positive infinity";
-				}
-			}
-			else{
-				//NaN (quiet/signaling)
-				specialCase.innerHTML = "Special: NaN (Quiet/signaling)";
-			}
-		}
-		else if(arrayEquals(e, [0,0,0,0,0])){ //zero or subnormal
-			if(m, [0,0,0,0,0,0,0,0,0,0]){
-				//Zero/Negative Zero
-				if(b[0] == "1"){
-					specialCase.innerHTML = "Special: Zero/Negative Zero";
-				}
-				else{
-					specialCase.innerHTML = "Special: Zero";
-				}
-			}
-			else{
-				//NaN (quiet/signaling)
-				specialCase.innerHTML = "Special: Subnormal number)";
-			}
-		}
+		
+		showSpecialCase(e, m, b);
 		
 		m = m.replace(/1\./g,"");
 		b = b + m; //10 bits
@@ -193,7 +170,7 @@ function binaryConvert(m, e){
 function decimalConvert(m, e){
 	let b = "0 "; //default positive sign bit
 	let f = false;
-		
+	specialCase.innerHTML="";
 	if(decimalMantissaErrorCheck(m) && decimalExpErrorCheck(e)){
 
 		if(m[0] == '-'){ //negative sign bit;
@@ -202,20 +179,43 @@ function decimalConvert(m, e){
 
 		m = m.replace(/[-+]/g,"");
 		
-		m = decimalToBinaryMantissa(m);
-
-		console.log(m);
+		//reconcile 10^0
+		m = String(Number(m) * (10**e));
+		e = 0;
+		
+		//m = decimalToBinaryMantissa(m);
+		m = decimalToBinary(Number(m), 11);
 		
 		[ m, expChange ]= normalize(m);
+		
+		if(m == false){
+			showError("Mantissa is zero input!");
+			return [b, toHex(b), true];
+		}
+		
+		if(m.indexOf('.') != -1){
+			if(m.slice(13).indexOf(1) != -1){
+				approx.style.display="block";
+			}
+			m = m.slice(0,12);
+		}
+		else{
+			m = m.slice(0,11);
+		}
 
 		console.log(m)
 
 		m = extendTrailingZeros(m, 11); //Mantissa should only have 1 - 11 bits including MSb
 		
-		e = parseInt(e, 10) + 15 + expChange;
+		e = 15 + expChange;
+		if(!binaryExpErrorCheck((e-15).toString())){
+			return [b, toHex(b), true];
+		}
 		e = decimalToBinary(e, 5);	
 		b = b + e + " ";
 
+		showSpecialCase(e, m, b);	
+			
 		m = m.replace(/1\./g,"");
 		b = b + m; //10 bits
 
@@ -322,7 +322,7 @@ function decimalExpErrorCheck(e){ //Decimal Exp
 	else if(isNaN(e)){
 		showError("Exponent is not a number!");
 	}
-	else if ( e < -14 || e > 15 ){
+	else if ( e < -15 || e > 16 ){
 		showError("Exponent is out of range!");
 	}
 	else{
@@ -336,6 +336,8 @@ function decimalExpErrorCheck(e){ //Decimal Exp
 function showError(s){
 	errText.innerHTML=s;
 	errText.style.display="block";
+	approx.style.display="none";
+	specialCase.innerHTML="";
 }
 
 function toHex(b){
@@ -437,17 +439,40 @@ function decimalToBinary(d, n = 5){
 		return -1;
 	}
 	let binary = "";
+	let dotIndex = String(d).indexOf('.');
+	let fraction = null;
+	if(dotIndex != -1){
+		[d, fraction] = String(d).split('.');
+		d = parseInt(d, 10);
+		if(d == 0){
+			binary = "0";
+		}
+	}
 	while(d > 0){
 		binary = d%2 + binary;
 		d = Math.floor(d/2);
 	}
+	if(fraction != null){
+		binary = binary + '.';
+		fraction = fraction / (10**(fraction.length));
+		let binaryFraction = "";
+		do{
+			fraction = fraction * 2;
+			binaryFraction = binaryFraction + String(fraction)[0];
+			if(fraction > 1){
+				fraction = fraction - 1;
+			}
+			
+		}while(fraction % 1 != 0);
+		binary = binary + binaryFraction;
+	}
+	
 	if (binary.length < n){
 		for(let i = binary.length; i < n; i++){
 			binary = "0" + binary;
 		}
 	}
-
-	//console.log(binary);
+	
 	return binary;
 }
 
@@ -595,3 +620,36 @@ function leadingDigitsNormalize(m, d){
 	return [m[i] + '.' + m.substring(i+1, m.length), (i-d)*(-1)]
 }
 
+function showSpecialCase(e, m, b){
+	m = m.slice(2);
+	console.log(m);
+	if(arrayEquals(e, [1,1,1,1,1])){
+			if(arrayEquals(m, [0,0,0,0,0,0,0,0,0,0])){
+				//Infinity
+				if(b[0] == "1"){
+					specialCase.innerHTML = "Special: Negative infinity";
+				}
+				else{
+					specialCase.innerHTML = "Special: Positive infinity";
+				}
+			}
+			else{
+				//NaN (quiet/signaling)
+				specialCase.innerHTML = "Special: NaN (Quiet/signaling)";
+			}
+		}
+		else if(arrayEquals(e, [0,0,0,0,0])){ //zero or subnormal
+			if(arrayEquals(m, [0,0,0,0,0,0,0,0,0,0])){
+				//Zero/Negative Zero
+				if(b[0] == "1"){
+					specialCase.innerHTML = "Special: Zero/Negative Zero";
+				}
+				else{
+					specialCase.innerHTML = "Special: Zero";
+				}
+			}
+			else{
+				specialCase.innerHTML = "Special: Subnormal number";
+			}
+		}
+}
