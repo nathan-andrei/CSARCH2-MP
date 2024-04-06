@@ -201,9 +201,11 @@ function decimalConvert(m, e){
 		//reconcile 10^0
 		m = String(Number(m) * (10**e));
 		//console.log(m);
+		/*
 		if(m.indexOf(e) != -1){
 			let scientificDigits = Number(m.replace(/.*e-/g, ""));
-			let significantDigits = m.replace(/e.*/g, "");
+			let significantDigits = m.replace(/e.*///g, "");
+			/*
 			m = m.replace(/e.+/g, "");
 			m = m.replace(/\./g, "");
 			for(let i = 1; i <= scientificDigits; i++){
@@ -213,6 +215,7 @@ function decimalConvert(m, e){
 			if(m.indexOf(e) != -1) m = m.replace(/e.+/g, "");
 			console.log(m)
 		}
+		*/
 		e = 0;
 		//m = decimalToBinaryMantissa(m);
 		m = decimalToBinary(Number(m), 11);
