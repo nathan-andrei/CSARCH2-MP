@@ -152,8 +152,19 @@ function binaryConvert(m, e){
 		//We will use trailing zero for now
 		m = extendTrailingZeros(m, 11); //Mantissa should only have 1 - 11 bits including MSb
 		
-		e = parseInt(e, 10) + 15 + expChange;
+		console.log(e);
 		
+		if(console.log("e%1: " + e%1 + " e: " + e), e%1 < 1 && e%1 != 0){
+			showError("Exponent must be an integer!");
+			return [b, toHex(b), true];
+		}
+		else if(isNaN(e%1)){
+			showError("Exponent is not a number!");
+			return [b, toHex(b), true];
+		}
+		
+		e = parseInt(e, 10) + 15 + expChange;
+		console.log(e);
 		if(!binaryExpErrorCheck((e-15).toString())){
 			return [b, toHex(b), true];
 		}
@@ -189,18 +200,29 @@ function decimalConvert(m, e){
 		
 		//reconcile 10^0
 		m = String(Number(m) * (10**e));
+		//console.log(m);
+		if(m.indexOf(e) != -1){
+			let scientificDigits = Number(m.replace(/.*e-/g, ""));
+			let significantDigits = m.replace(/e.*/g, "");
+			m = m.replace(/e.+/g, "");
+			m = m.replace(/\./g, "");
+			for(let i = 1; i <= scientificDigits; i++){
+				m = "0" + m;
+			}	
+			m = m[0] + '.' + m.slice(1);
+			if(m.indexOf(e) != -1) m = m.replace(/e.+/g, "");
+			console.log(m)
+		}
 		e = 0;
-		
 		//m = decimalToBinaryMantissa(m);
 		m = decimalToBinary(Number(m), 11);
 		
+		console.log(m);
+		
 		[ m, expChange ]= normalize(m);
 		
-		if(m == false){
-			showError("Mantissa is zero input!");
-			return [b, toHex(b), true];
-		}
 		
+		console.log(m);
 		if(m.indexOf('.') != -1){
 			if(m.slice(13).indexOf(1) != -1){
 				approx.style.display="block";
@@ -214,6 +236,15 @@ function decimalConvert(m, e){
 		console.log(m)
 
 		m = extendTrailingZeros(m, 11); //Mantissa should only have 1 - 11 bits including MSb
+		
+		/*if(console.log("e%1: " + e%1 + " e: " + e), e%1 < 1 && e%1 != 0){
+			showError("Exponent must be an integer!");
+			return [b, toHex(b), true];
+		}
+		else if(isNaN(e%1)){
+			showError("Exponent is not a number!");
+			return [b, toHex(b), true];
+		}*/
 		
 		e = 15 + expChange;
 		if(!binaryExpErrorCheck((e-15).toString())){
@@ -288,6 +319,7 @@ function binaryExpErrorCheck(e){ //Binary Exp
 	}
 	//out of range
 	else if ( e < -15 || e > 16 ){
+		console.log(e);
 		showError("Exponent is out of range!");
 	}
 	else{
@@ -329,6 +361,7 @@ function decimalExpErrorCheck(e){ //Decimal Exp
 		showError("Exponent is not a number!");
 	}
 	else if ( e < -15 || e > 16 ){
+		console.log(e);
 		showError("Exponent is out of range!");
 	}
 	else{
@@ -439,6 +472,7 @@ function decimalToBinary(d, n = 5){
 		console.log("toBinary function: expected number parameter, got " + typeof b);
 		return -1;
 	}
+	//console.log(typeof d.toFixed(20));
 	let binary = "";
 	let dotIndex = String(d).indexOf('.');
 	let fraction = null;
@@ -454,17 +488,28 @@ function decimalToBinary(d, n = 5){
 		d = Math.floor(d/2);
 	}
 	if(fraction != null){
+		fraction = fraction.replace(/(0*[1-9]+)(?:0*)/g,"$1");
+		console.log(fraction);
 		binary = binary + '.';
 		fraction = fraction / (10**(fraction.length));
+		
 		let binaryFraction = "";
+		let sentinel = 0;
 		do{
-			fraction = fraction * 2;
-			binaryFraction = binaryFraction + String(fraction)[0];
+			fraction = (fraction * 2);
+			//console.log(fraction);
+			if(String(fraction).indexOf("e") != -1){
+				binaryFraction = binaryFraction + "0"
+			}
+			else{
+				binaryFraction = binaryFraction + String(fraction)[0];
+			}
+			//console.log(binaryFraction);
 			if(fraction > 1){
 				fraction = fraction - 1;
 			}
-			
-		}while(fraction % 1 != 0);
+			sentinel += 1;			
+		}while(fraction % 1 != 0 && sentinel < 50);
 		binary = binary + binaryFraction;
 	}
 	
